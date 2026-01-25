@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>de.aufgussplan.scraper</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/java/src_own/aufgussplan/.venv/bin/aufgussplan</string>
+        <string>--db</string>
+        <string>--all</string>
+        <string>--quiet</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <!-- Täglich um 10:00 Uhr -->
+        <key>Hour</key>
+        <integer>10</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/java/.local/share/aufgussplan/scraper.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/java/.local/share/aufgussplan/scraper.error.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist>
