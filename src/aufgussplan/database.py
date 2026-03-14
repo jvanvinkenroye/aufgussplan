@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .scraper import Aufguss, Aufgussplan
+from .scraper import Aufgussplan
 
 
 def get_db_path() -> Path:
@@ -87,27 +87,22 @@ def get_or_create_standort(conn: sqlite3.Connection, slug: str) -> int:
     Returns:
         Standort-ID
     """
-    cursor = conn.execute(
-        "SELECT id FROM standorte WHERE slug = ?",
-        (slug,)
-    )
+    cursor = conn.execute("SELECT id FROM standorte WHERE slug = ?", (slug,))
     row = cursor.fetchone()
 
     if row:
-        return row["id"]
+        return int(row["id"])
 
     cursor = conn.execute(
         "INSERT INTO standorte (slug, name) VALUES (?, ?)",
-        (slug, slug.replace("-", " ").title())
+        (slug, slug.replace("-", " ").title()),
     )
     conn.commit()
     return cursor.lastrowid  # type: ignore
 
 
 def save_aufgussplan(
-    conn: sqlite3.Connection,
-    plan: Aufgussplan,
-    datum: str | None = None
+    conn: sqlite3.Connection, plan: Aufgussplan, datum: str | None = None
 ) -> int:
     """Speichert einen Aufgussplan in der Datenbank.
 
@@ -127,29 +122,27 @@ def save_aufgussplan(
     # Prüfe ob bereits ein Abruf für heute existiert
     cursor = conn.execute(
         "SELECT id FROM abrufe WHERE standort_id = ? AND datum = ?",
-        (standort_id, datum)
+        (standort_id, datum),
     )
     existing = cursor.fetchone()
 
     if existing:
-        # Lösche alte Aufgüsse
-        conn.execute("DELETE FROM aufguesse WHERE abruf_id = ?", (existing["id"],))
-        abruf_id = existing["id"]
+        abruf_id: int = int(existing["id"])
+        conn.execute("DELETE FROM aufguesse WHERE abruf_id = ?", (abruf_id,))
         # Update Abruf
         conn.execute(
             """UPDATE abrufe
                SET abgerufen_am = ?, anzahl_aufguesse = ?
                WHERE id = ?""",
-            (plan.abgerufen_am, len(plan.aufguesse), abruf_id)
+            (plan.abgerufen_am, len(plan.aufguesse), abruf_id),
         )
     else:
-        # Neuer Abruf
         cursor = conn.execute(
             """INSERT INTO abrufe (standort_id, abgerufen_am, datum, anzahl_aufguesse)
                VALUES (?, ?, ?, ?)""",
-            (standort_id, plan.abgerufen_am, datum, len(plan.aufguesse))
+            (standort_id, plan.abgerufen_am, datum, len(plan.aufguesse)),
         )
-        abruf_id = cursor.lastrowid  # type: ignore
+        abruf_id = int(cursor.lastrowid)  # type: ignore[arg-type]
 
     # Speichere Aufgüsse
     for aufguss in plan.aufguesse:
@@ -168,7 +161,7 @@ def save_aufgussplan(
                 aufguss.mitarbeiter,
                 aufguss.beschreibung,
                 ",".join(aufguss.eigenschaften) if aufguss.eigenschaften else None,
-            )
+            ),
         )
 
     conn.commit()
@@ -176,9 +169,7 @@ def save_aufgussplan(
 
 
 def get_aufguesse_by_date(
-    conn: sqlite3.Connection,
-    datum: str,
-    standort: str | None = None
+    conn: sqlite3.Connection, datum: str, standort: str | None = None
 ) -> list[dict[str, Any]]:
     """Holt Aufgüsse für ein bestimmtes Datum.
 

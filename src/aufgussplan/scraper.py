@@ -8,7 +8,6 @@ from typing import Any
 import httpx
 from bs4 import BeautifulSoup, Tag
 
-
 # Bekannte aktive Standorte
 KNOWN_LOCATIONS = [
     "fellbach",
@@ -219,7 +218,7 @@ class AufgussplanScraper:
             Aufguss-Objekt oder None
         """
         # Überspringe Banner-Zeilen und Header
-        row_class = row.get("class", [])
+        row_class = row.get("class")
         if isinstance(row_class, list) and "banner" in row_class:
             return None
 

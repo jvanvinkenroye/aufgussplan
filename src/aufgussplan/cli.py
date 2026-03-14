@@ -5,8 +5,15 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
+from sqlite3 import Connection
 
-from .database import get_aufguesse_by_date, get_db_path, get_statistics, init_db, save_aufgussplan
+from .database import (
+    get_aufguesse_by_date,
+    get_db_path,
+    get_statistics,
+    init_db,
+    save_aufgussplan,
+)
 from .scraper import KNOWN_LOCATIONS, AufgussplanScraper
 
 
@@ -98,7 +105,8 @@ Beispiele:
         "--db-file",
         metavar="DATEI",
         type=Path,
-        help="Pfad zur SQLite-Datenbank (Standard: ~/.local/share/aufgussplan/aufgussplan.db)",
+        help="Pfad zur SQLite-Datenbank "
+        "(Standard: ~/.local/share/aufgussplan/aufgussplan.db)",
     )
 
     parser.add_argument(
@@ -120,6 +128,8 @@ Beispiele:
     )
 
     args = parser.parse_args()
+
+    conn: Connection | None = None
 
     # Datenbank-Pfad
     db_path = args.db_file or get_db_path()
@@ -167,8 +177,7 @@ Beispiele:
 
         conn = init_db(db_path)
         aufguesse = get_aufguesse_by_date(
-            conn, datum,
-            standort=args.standorte[0] if args.standorte else None
+            conn, datum, standort=args.standorte[0] if args.standorte else None
         )
         conn.close()
 
@@ -183,10 +192,16 @@ Beispiele:
                 if a["standort"] != current_standort:
                     current_standort = a["standort"]
                     print(f"\n=== {current_standort.upper()} ===")
-                print(f"  {a['zeit']} | {a['sauna'] or '-':20} | {a['aufguss_name'] or '-'}")
+                sauna = a["sauna"] or "-"
+                name = a["aufguss_name"] or "-"
+                print(f"  {a['zeit']} | {sauna:20} | {name}")
         else:
             # JSON Ausgabe
-            print(json.dumps(aufguesse, ensure_ascii=False, indent=2 if args.pretty else None))
+            print(
+                json.dumps(
+                    aufguesse, ensure_ascii=False, indent=2 if args.pretty else None
+                )
+            )
 
         return 0
 
@@ -218,7 +233,6 @@ Beispiele:
         return 1
 
     # Datenbank-Verbindung wenn nötig
-    conn = None
     if args.db:
         conn = init_db(db_path)
         if not args.quiet:
