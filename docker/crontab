@@ -1,4 +1,0 @@
-# Aufgussplan Scraper - Täglich um 10:00 Uhr
-0 10 * * * root /usr/local/bin/aufgussplan --db-file /data/aufgussplan.db --db --all --quiet >> /var/log/aufgussplan.log 2>&1
-
-# Leere Zeile am Ende erforderlich

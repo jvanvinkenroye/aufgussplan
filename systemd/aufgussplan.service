@@ -1,0 +1,16 @@
+[Unit]
+Description=Aufgussplan Scraper
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment=TZ=Europe/Berlin
+ExecStart=/usr/bin/podman run --rm \
+    --name aufgussplan-scrape \
+    -v aufgussplan-data:/data:Z \
+    localhost/aufgussplan:latest \
+    --db-file /data/aufgussplan.db --db --all --quiet
+
+[Install]
+WantedBy=default.target
