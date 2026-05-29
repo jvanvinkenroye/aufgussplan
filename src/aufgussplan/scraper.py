@@ -278,7 +278,7 @@ class AufgussplanScraper:
 
         # Extrahiere Duft und Eigenschaften
         if duft_cell and isinstance(duft_cell, Tag):
-            duft_text = duft_cell.find("span", class_="dufttext")
+            duft_text = duft_cell.find("span", class_=re.compile(r"dufttext"))
             if duft_text:
                 duft_str = duft_text.get_text(strip=True)
                 if duft_str:
